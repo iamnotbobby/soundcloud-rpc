@@ -14,6 +14,7 @@ import { WebhookService } from './services/webhookService';
 import { ThemeService } from './services/themeService';
 import { ShortcutService } from './services/shortcutService';
 import { audioMonitorScript } from './services/audioMonitorService';
+import { shuffleFixScript } from './services/shuffleFixService';
 import type { TrackInfo, TrackUpdateMessage } from './types';
 import path = require('path');
 import { platform } from 'os';
@@ -53,6 +54,8 @@ const store = new Store({
         trackParserEnabled: true,
         richPresencePreviewEnabled: false,
         autoUpdaterEnabled: true,
+        shuffleFixEnabled: false,
+        shuffleFixMaxLimit: 5000,
     },
     clearInvalidConfig: true,
     encryptionKey: 'soundcloud-rpc-config',
@@ -641,6 +644,14 @@ async function init() {
             // Inject audio monitoring script
             await contentView.webContents.executeJavaScript(audioMonitorScript);
 
+            // Inject shuffle fix script if enabled
+            if (store.get('shuffleFixEnabled', false)) {
+                const maxLimit = store.get('shuffleFixMaxLimit', 5000);
+                const script = shuffleFixScript
+                    .replace('__MAX_LIMIT__', maxLimit.toString());
+                await contentView.webContents.executeJavaScript(script);
+            }
+
             if (presenceService) {
                 await presenceService.updatePresence(lastTrackInfo as any);
             }
@@ -692,6 +703,13 @@ async function init() {
             } else {
                 console.log('Auto-updater disabled by user');
             }
+        } else if (key === 'shuffleFixEnabled') {
+            console.log('Shuffle fix', data.value ? 'enabled' : 'disabled', '- reloading page');
+            if (contentView && contentView.webContents) {
+                contentView.webContents.reload();
+            }
+        } else if (key === 'shuffleFixMaxLimit') {
+            console.log('Shuffle fix max limit set to:', data.value);
         } else if (key === 'customTheme') {
             if (data.value === 'none') {
                 themeService.removeCustomTheme();

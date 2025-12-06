@@ -763,6 +763,23 @@ export class SettingsManager {
             </div>
 
             <div class="setting-group">
+                <h2>Shuffle Fix</h2>
+                <div class="setting-item">
+                    <span data-i18n="enableShuffleFix">${this.translationService.translate('enableShuffleFix')}</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="shuffleFixEnabled" ${this.store.get('shuffleFixEnabled', false) ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="description" data-i18n="shuffleFixDescription">${this.translationService.translate('shuffleFixDescription')}</div>
+                <div class="setting-item" id="shuffleFixMaxLimitField" style="display: ${this.store.get('shuffleFixEnabled', false) ? 'flex' : 'none'};">
+                    <span data-i18n="shuffleFixMaxLimit">${this.translationService.translate('shuffleFixMaxLimit')}</span>
+                    <input type="number" id="shuffleFixMaxLimit" value="${this.store.get('shuffleFixMaxLimit', 5000)}" min="100" max="5000" step="100" class="textInput" style="width: 100px; text-align: right;">
+                </div>
+
+            </div>
+
+            <div class="setting-group">
                 <h2 data-i18n="adBlocker">${this.translationService.translate('adBlocker')}</h2>
                 <div class="setting-item">
                     <span data-i18n="enableAdBlocker">${this.translationService.translate('enableAdBlocker')}</span>
@@ -1178,6 +1195,24 @@ export class SettingsManager {
 
             document.getElementById('autoUpdaterEnabled').addEventListener('change', (e) => {
                 ipcRenderer.send('setting-changed', { key: 'autoUpdaterEnabled', value: e.target.checked });
+            });
+
+            document.getElementById('shuffleFixEnabled').addEventListener('change', (e) => {
+                const isEnabled = e.target.checked;
+                document.getElementById('shuffleFixMaxLimitField').style.display = isEnabled ? 'flex' : 'none';
+                document.getElementById('shuffleFixAutoDisableField').style.display = isEnabled ? 'flex' : 'none';
+                ipcRenderer.send('setting-changed', { key: 'shuffleFixEnabled', value: isEnabled });
+            });
+
+            document.getElementById('shuffleFixMaxLimit').addEventListener('change', (e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value >= 100 && value <= 5000) {
+                    ipcRenderer.send('setting-changed', { key: 'shuffleFixMaxLimit', value });
+                }
+            });
+
+            document.getElementById('shuffleFixAutoDisable').addEventListener('change', (e) => {
+                ipcRenderer.send('setting-changed', { key: 'shuffleFixAutoDisable', value: e.target.checked });
             });
 
             // Rich Presence Preview
