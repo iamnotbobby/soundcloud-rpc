@@ -647,8 +647,7 @@ async function init() {
             // Inject shuffle fix script if enabled
             if (store.get('shuffleFixEnabled', false)) {
                 const maxLimit = store.get('shuffleFixMaxLimit', 5000);
-                const script = shuffleFixScript
-                    .replace('__MAX_LIMIT__', maxLimit.toString());
+                const script = shuffleFixScript.replace('__MAX_LIMIT__', maxLimit.toString());
                 await contentView.webContents.executeJavaScript(script);
             }
 

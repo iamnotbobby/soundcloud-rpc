@@ -1,11 +1,11 @@
 /**
- * 
+ *
  * Fixes SoundCloud's shuffle limitation where it only shuffles currently loaded tracks instead of the entire playlist/collection.
- * 
+ *
  * 1. Patches collection limits to fetch more tracks per request
  * 2. Intercepts the shuffle function to pre-load all tracks before shuffling
  * 3. Modifies XHR requests to use higher limit parameters
- * 
+ *
  */
 
 export const shuffleFixScript = `
