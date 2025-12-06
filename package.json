@@ -19,7 +19,7 @@
         "build-linux-appimage": "tsc && electron-builder -l appimage"
     },
     "main": "./tsc/main.js",
-    "repository": "https://github.com/richardhbtz/soundcloud-rpc",
+    "repository": "https://github.com/iamnotbobby/soundcloud-rpc",
     "publish": {
         "provider": "github",
         "releaseType": "release"
