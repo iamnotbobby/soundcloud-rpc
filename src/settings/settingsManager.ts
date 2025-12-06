@@ -1200,7 +1200,6 @@ export class SettingsManager {
             document.getElementById('shuffleFixEnabled').addEventListener('change', (e) => {
                 const isEnabled = e.target.checked;
                 document.getElementById('shuffleFixMaxLimitField').style.display = isEnabled ? 'flex' : 'none';
-                document.getElementById('shuffleFixAutoDisableField').style.display = isEnabled ? 'flex' : 'none';
                 ipcRenderer.send('setting-changed', { key: 'shuffleFixEnabled', value: isEnabled });
             });
 
@@ -1209,10 +1208,6 @@ export class SettingsManager {
                 if (!isNaN(value) && value >= 100 && value <= 5000) {
                     ipcRenderer.send('setting-changed', { key: 'shuffleFixMaxLimit', value });
                 }
-            });
-
-            document.getElementById('shuffleFixAutoDisable').addEventListener('change', (e) => {
-                ipcRenderer.send('setting-changed', { key: 'shuffleFixAutoDisable', value: e.target.checked });
             });
 
             // Rich Presence Preview
