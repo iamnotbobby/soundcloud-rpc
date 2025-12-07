@@ -41,6 +41,7 @@
     "enableAutoUpdater": "Activar Actualizador Automático",
     "enableShuffleFix": "Activar Arreglo de Reproducción Aleatoria",
     "shuffleFixMaxLimit": "Máximo de Pistas Aleatorias",
+    "shuffleFixBatchSize": "Tamaño de Lote Aleatorio",
     "shuffleFixDescription": "Arregla la reproducción aleatoria cargando todas las pistas en listas de reproducción/me gusta antes de mezclar, en lugar de mezclar secuencialmente",
     "showWebhookExample": "Mostrar Ejemplo de Datos",
     "customThemes": "Temas Personalizados",

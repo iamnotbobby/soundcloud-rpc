@@ -776,6 +776,10 @@ export class SettingsManager {
                     <span data-i18n="shuffleFixMaxLimit">${this.translationService.translate('shuffleFixMaxLimit')}</span>
                     <input type="number" id="shuffleFixMaxLimit" value="${this.store.get('shuffleFixMaxLimit', 5000)}" min="100" max="5000" step="100" class="textInput" style="width: 100px; text-align: right;">
                 </div>
+                <div class="setting-item" id="shuffleFixBatchSizeField" style="display: ${this.store.get('shuffleFixEnabled', false) ? 'flex' : 'none'};">
+                    <span data-i18n="shuffleFixBatchSize">${this.translationService.translate('shuffleFixBatchSize')}</span>
+                    <input type="number" id="shuffleFixBatchSize" value="${this.store.get('shuffleFixBatchSize', 1000)}" min="100" max="2000" step="100" class="textInput" style="width: 100px; text-align: right;">
+                </div>
 
             </div>
 
@@ -1200,13 +1204,21 @@ export class SettingsManager {
             document.getElementById('shuffleFixEnabled').addEventListener('change', (e) => {
                 const isEnabled = e.target.checked;
                 document.getElementById('shuffleFixMaxLimitField').style.display = isEnabled ? 'flex' : 'none';
+                document.getElementById('shuffleFixBatchSizeField').style.display = isEnabled ? 'flex' : 'none';
                 ipcRenderer.send('setting-changed', { key: 'shuffleFixEnabled', value: isEnabled });
             });
 
-            document.getElementById('shuffleFixMaxLimit').addEventListener('change', (e) => {
+            document.getElementById('shuffleFixMaxLimit').addEventListener('blur', (e) => {
                 const value = parseInt(e.target.value);
                 if (!isNaN(value) && value >= 100 && value <= 5000) {
                     ipcRenderer.send('setting-changed', { key: 'shuffleFixMaxLimit', value });
+                }
+            });
+
+            document.getElementById('shuffleFixBatchSize').addEventListener('blur', (e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value >= 100 && value <= 2000) {
+                    ipcRenderer.send('setting-changed', { key: 'shuffleFixBatchSize', value });
                 }
             });
 

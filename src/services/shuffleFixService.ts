@@ -10,7 +10,8 @@
 
 export const shuffleFixScript = `
 (function() {
-    const MAX_LIMIT = __MAX_LIMIT__;
+    const MAX_LIMIT = __MAX_LIMIT__; // Maximum tracks to request per API call
+    const BATCH_SIZE = __BATCH_SIZE__; // Number of tracks to load per batch
 
     function findWebpackRequire() {
         if (typeof window.webpackJsonp !== 'undefined') {
@@ -31,11 +32,12 @@ export const shuffleFixScript = `
         return null;
     }
 
-    function patchCollections(webpackRequire) {
+    function patchModules(webpackRequire) {
         const cache = webpackRequire.c || {};
         for (const moduleId in cache) {
             try {
                 const moduleExports = cache[moduleId]?.exports;
+                
                 if (moduleExports?.prototype) {
                     const proto = moduleExports.prototype;
                     if (proto.defaults?.limit !== undefined) {
@@ -50,15 +52,7 @@ export const shuffleFixScript = `
                         proto.setLimit._patched = true;
                     }
                 }
-            } catch (e) {}
-        }
-    }
-
-    function patchShuffle(webpackRequire) {
-        const cache = webpackRequire.c || {};
-        for (const moduleId in cache) {
-            try {
-                const moduleExports = cache[moduleId]?.exports;
+                
                 if (moduleExports?.states?.shuffle?.setup) {
                     const originalSetup = moduleExports.states.shuffle.setup;
                     moduleExports.states.shuffle.setup = function() {
@@ -69,6 +63,7 @@ export const shuffleFixScript = `
                         return originalSetup.apply(this, arguments);
                     };
                 }
+                
                 if (moduleExports?.toggleShuffle && moduleExports?.getQueue && !moduleExports.toggleShuffle._patched) {
                     const originalToggleShuffle = moduleExports.toggleShuffle;
                     let isLoading = false;
@@ -123,12 +118,12 @@ export const shuffleFixScript = `
                                 try {
                                     console.log('Enabling shuffle - loading all tracks...');
                                     console.log('Current queue length:', initialLength);
+                                    console.log('Loading with MAX_LIMIT:', MAX_LIMIT, 'BATCH_SIZE:', BATCH_SIZE);
                                     
-                                    let waitIterations = 0;
+                                    let stalledCycles = 0;
                                     let lastLength = initialLength;
-                                    const maxBatchSize = 1000;
                                     
-                                    while (waitIterations < 200) {
+                                    while (stalledCycles <= 33) {
                                         const hasMoreTracks = moduleExports.hasMoreAhead && moduleExports.hasMoreAhead();
                                         
                                         if (!hasMoreTracks) {
@@ -138,7 +133,7 @@ export const shuffleFixScript = `
                                         
                                         if (moduleExports.pullNext) {
                                             try {
-                                                moduleExports.pullNext(maxBatchSize);
+                                                moduleExports.pullNext(BATCH_SIZE);
                                             } catch (e) {
                                                 console.error('Error calling pullNext:', e);
                                                 break;
@@ -150,15 +145,15 @@ export const shuffleFixScript = `
                                         if (queue.length > lastLength) {
                                             const loaded = queue.length - lastLength;
                                             lastLength = queue.length;
-                                            waitIterations = 0;
+                                            stalledCycles = 0;
                                             console.log('Queue now has', lastLength, 'tracks (+' + loaded + ')');
                                         } else {
-                                            waitIterations++;
+                                            stalledCycles++;
                                         }
                                     }
                                     
-                                    if (waitIterations >= 200) {
-                                        console.warn('Loading stopped after 200 iterations of no progress');
+                                    if (stalledCycles > 33) {
+                                        console.warn('Stream stalled');
                                     }
                                     
                                     console.log('Finished - queue loaded with', queue.length, 'tracks (was', initialLength, ')');
@@ -214,8 +209,7 @@ export const shuffleFixScript = `
 
     const webpackRequire = findWebpackRequire();
     if (webpackRequire) {
-        patchCollections(webpackRequire);
-        patchShuffle(webpackRequire);
+        patchModules(webpackRequire);
         console.log('Successfully patched webpack modules');
     } else {
         console.warn('Could not find webpack require function');

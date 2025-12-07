@@ -56,6 +56,7 @@ const store = new Store({
         autoUpdaterEnabled: true,
         shuffleFixEnabled: false,
         shuffleFixMaxLimit: 5000,
+        shuffleFixBatchSize: 500,
     },
     clearInvalidConfig: true,
     encryptionKey: 'soundcloud-rpc-config',
@@ -647,7 +648,10 @@ async function init() {
             // Inject shuffle fix script if enabled
             if (store.get('shuffleFixEnabled', false)) {
                 const maxLimit = store.get('shuffleFixMaxLimit', 5000);
-                const script = shuffleFixScript.replace('__MAX_LIMIT__', maxLimit.toString());
+                const batchSize = store.get('shuffleFixBatchSize', 500);
+                const script = shuffleFixScript
+                    .replace('__MAX_LIMIT__', maxLimit.toString())
+                    .replace('__BATCH_SIZE__', batchSize.toString());
                 await contentView.webContents.executeJavaScript(script);
             }
 
@@ -703,12 +707,7 @@ async function init() {
                 console.log('Auto-updater disabled by user');
             }
         } else if (key === 'shuffleFixEnabled') {
-            console.log('Shuffle fix', data.value ? 'enabled' : 'disabled', '- reloading page');
-            if (contentView && contentView.webContents) {
-                contentView.webContents.reload();
-            }
-        } else if (key === 'shuffleFixMaxLimit') {
-            console.log('Shuffle fix max limit set to:', data.value);
+            console.log('Shuffle fix enabled:', data.value);
         } else if (key === 'customTheme') {
             if (data.value === 'none') {
                 themeService.removeCustomTheme();
@@ -732,6 +731,12 @@ async function init() {
 
         if (store.get('adBlocker')) {
             mainWindow.webContents.reload();
+        }
+
+        if (store.get('shuffleFixEnabled')) {
+            if (contentView && contentView.webContents) {
+                contentView.webContents.reload();
+            }
         }
 
         if (store.get('discordRichPresence')) {

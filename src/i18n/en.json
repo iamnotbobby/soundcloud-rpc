@@ -42,6 +42,7 @@
     "enableAutoUpdater": "Enable Auto Updater",
     "enableShuffleFix": "Enable Shuffle Fix",
     "shuffleFixMaxLimit": "Shuffle Max Tracks",
+    "shuffleFixBatchSize": "Shuffle Batch Size",
     "shuffleFixDescription": "Fixes shuffle by loading all tracks in playlists/likes before shuffling, instead of shuffling sequentially",
     "showWebhookExample": "Show Example Payload",
     "customThemes": "Custom Themes",
